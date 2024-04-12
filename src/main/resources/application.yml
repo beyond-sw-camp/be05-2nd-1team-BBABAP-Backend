@@ -1,0 +1,27 @@
+#spring.application.name=bbabap
+spring:
+  application:
+    name: instant-test
+  mvc:
+    compile-options:
+      compilerArgs: -parameters
+  datasource:
+    url: jdbc:mysql://localhost:3306/bbabap?useSSL=true&serverTimezone=Asia/Seoul&readOnly=false
+    username: root
+    password: "123456789"
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.MySQLDialect
+    hibernate:
+      ddl-auto: update
+  main:
+    allow-circular-references: true
+server:
+  port: 7777
+jwt:
+  secret: "vmfhaltmskdlstkfkdgodyroqkfwkdbalroqkfwkdbalababababababababaa"
+logging:
+  level:
+    root: DEBUG
+tags-sorter: alpha
+operations-sorter: method
