@@ -18,6 +18,9 @@ public class FavoriteController {
         return favoriteService.saveChargerInfoByName(chargerName);
     }
 
-
+    @PostMapping("find")
+    public String findChargerInfoByName(@RequestParam("충전소명") String chargerName) {
+        return favoriteService.saveChargerInfoByName(chargerName);
+    }
 
 }
