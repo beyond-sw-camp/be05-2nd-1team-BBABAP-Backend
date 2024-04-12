@@ -20,8 +20,8 @@ server:
   port: 7777
 jwt:
   secret: "vmfhaltmskdlstkfkdgodyroqkfwkdbalroqkfwkdbalababababababababaa"
-logging:
-  level:
-    root: DEBUG
+#logging:
+#  level:
+#    root: DEBUG
 tags-sorter: alpha
 operations-sorter: method
