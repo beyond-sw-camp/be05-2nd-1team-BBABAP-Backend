@@ -169,12 +169,16 @@ public class BoardService {
     }
 
     private BoardListResponseDTO convertToBoardDTO(Board board) {
+        Long commentCount = board.getComments().stream()
+                .filter(comment -> !comment.getDeletedYn())
+                .count();
         return BoardListResponseDTO.builder()
                 .id(board.getId())
                 .title(board.getTitle())
                 .nickname(board.getUser().getNickname())
                 .registeredAt(board.getRegisteredAt())
                 .updatedAt(board.getUpdatedAt())
+                .commentCount(commentCount)
                 .build();
     }
 
