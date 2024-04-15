@@ -168,10 +168,15 @@ public class BoardService {
         return list;
     }
 
-    private BoardListResponseDTO convertToBoardDTO(Board board) {
-        Long commentCount = board.getComments().stream()
+    private long calculateCommentCount(Board board) {
+        return board.getComments().stream()
                 .filter(comment -> !comment.getDeletedYn())
                 .count();
+    }
+
+    private BoardListResponseDTO convertToBoardDTO(Board board) {
+        Long commentCount = calculateCommentCount(board);
+
         return BoardListResponseDTO.builder()
                 .id(board.getId())
                 .title(board.getTitle())
@@ -183,9 +188,8 @@ public class BoardService {
     }
 
     private BoardResponseDTO convertToDTO(Board board) {
-        long commentCount = board.getComments().stream()
-                .filter(comment -> !comment.getDeletedYn())
-                .count();
+        long commentCount = calculateCommentCount(board);
+
         List<CommentResponseDTO> commentDTOs = board.getComments().stream()
                 .filter(comment -> !comment.getDeletedYn())
                 .map(comment -> CommentResponseDTO.builder()
