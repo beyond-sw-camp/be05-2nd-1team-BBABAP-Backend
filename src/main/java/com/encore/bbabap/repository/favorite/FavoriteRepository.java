@@ -8,8 +8,3 @@ import org.springframework.stereotype.Repository;
 public interface FavoriteRepository extends JpaRepository<FavoriteEntity, Long> {
 
 }
-
-
-
-
-

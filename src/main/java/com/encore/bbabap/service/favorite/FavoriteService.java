@@ -1,5 +1,6 @@
 package com.encore.bbabap.service.favorite;
 
+import com.encore.bbabap.api.favorite.response.FavoriteResponseDTO;
 import com.encore.bbabap.domain.favorite.FavoriteEntity;
 import com.encore.bbabap.repository.favorite.FavoriteRepository;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +13,8 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -20,7 +23,7 @@ public class FavoriteService {
     static final String baseURL = "http://infuser.odcloud.kr/oas/docs?namespace=15119741/v1"; //API의 스펙을 설명하는 문서를 위한 URL
     static final String realDataURL = "https://api.odcloud.kr/api/15119741/v1/uddi:fe904caf-636f-4a49-aa94-e9064a446b3e"; //실제 API데이터를 가져오는 URL
     static final String myServiceKey = "By8%2BzbzlZwxRaJwkLoTWe7rgJIYf3TIkEnbrCY5mNB8f3clGoYgnY8J7f5C8bDSD1p21ek7oJoGHFbWhwRMRhw%3D%3D";//API키 >> 본인 키로 변경
-
+    //추가
     public String saveChargerInfoByName(String chargerName) {
         StringBuffer result = new StringBuffer();
         try {
@@ -66,9 +69,17 @@ public class FavoriteService {
             return "충전소 정보 저장 실패";
         }
     }//saveChargerInfoByName end
-
-//    public String findChargerInfoByName(/*나중에 여기에 사용자 아이디(이름)을 받아서 특정 회원의 즐겨찾기만 가져오도록 만들기*/){
-//
-//    }
+    //조회
+    public List<FavoriteResponseDTO> findChargerInfoByName(/*나중에 여기에 사용자 아이디(이름)을 받아서 특정 회원의 즐겨찾기만 가져오도록 만들기*/) {
+        List<FavoriteEntity> favoriteEntities = favoriteRepository.findAll();
+        return favoriteEntities.stream()
+                               .map(FavoriteResponseDTO::favoriteResponseDTO)
+                               .collect(Collectors.toList());
+    }//findChargerInfoByName end
+    //삭제
+    public String deleteChargerInfoById(Long id) {
+        favoriteRepository.deleteById(id);
+        return "즐겨찾기 삭제 완료";
+    }//deleteChargerInfoById end
 
 }

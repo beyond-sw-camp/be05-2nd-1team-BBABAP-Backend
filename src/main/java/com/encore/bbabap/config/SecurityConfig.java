@@ -64,7 +64,7 @@ public class SecurityConfig {
 
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/login", "/boards", "/members/register","/babap/**", "/h2-console/**").permitAll()
+                        .requestMatchers("/login", "/boards", "/members/register","/bbabap/**", "/h2-console/**").permitAll()
                         .requestMatchers("/admin").hasRole("ADMIN")
                         .requestMatchers("/reissue").permitAll()
                         .requestMatchers("//boards/**").permitAll()

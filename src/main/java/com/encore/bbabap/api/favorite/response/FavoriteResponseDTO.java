@@ -25,4 +25,5 @@ public class FavoriteResponseDTO {
         favoriteResponseDTO.setChargerType(favoriteEntity.getChargerType());
         return favoriteResponseDTO;
     }
+
 }

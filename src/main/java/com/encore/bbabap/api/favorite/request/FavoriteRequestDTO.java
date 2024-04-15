@@ -9,11 +9,13 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class FavoriteRequestDTO {
+
     private Long id;
     private String chargerName;
     private String chargerAddress;
     private String chargerPower;
     private String chargerType;
+
     public static FavoriteRequestDTO favoriteRequestDTO(FavoriteEntity favoriteEntity){
         FavoriteRequestDTO favoriteRequestDTO = new FavoriteRequestDTO();
         favoriteRequestDTO.setId(favoriteEntity.getId());
@@ -23,7 +25,5 @@ public class FavoriteRequestDTO {
         favoriteRequestDTO.setChargerType(favoriteEntity.getChargerType());
         return favoriteRequestDTO;
     }
+
 }
-
-
-

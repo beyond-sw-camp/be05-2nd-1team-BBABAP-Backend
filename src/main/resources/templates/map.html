@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>내 위치로 이동 및 반경 표시</title>
+    <!-- kakao API -->
+    <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=20d8bd05963c7e7755d93c037fbdb9fe&libraries=services,geometry"></script>
+    <!--마커 클릭시 출력되는 상세 정보창에 대한 style-->
+    <style>
+        .infoWindow {
+            padding: 5px;
+            border: 1px solid #CCCCCC;
+            border-radius: 5px;
+            width: auto;
+            min-width: 150px;
+            max-width: 300px;
+        }
+    </style>
+</head>
+
+<body>
+<h1>BBABAP&#x1F697&#x1F4A8</h1>
+<table>
+    <tr><!--주소 검색창-->
+        <td>주소검색</td>
+        <td><input type="text" name="detailAddress" id="address"></td>
+        <td><button type="button" id="searchBtn">검색</button></td>
+    </tr>
+    <tr><!--내 위치로 이동하는 버튼-->
+        <td colspan="3"><button type="button" id="findMyLocation">내 위치로</button></td>
+    </tr>
+</table>
+<!--카카오 맵을 표시할 영역-->
+<div id="map" style="width:85%;height:700px;"></div>
+<script>
+    var mapContainer = document.getElementById('map');
+    //지도 초기 정보 설정.
+    var mapOption = {
+        center: new kakao.maps.LatLng(33.450701, 126.570667),
+        level: 3
+    };
+
+    var map = new kakao.maps.Map(mapContainer, mapOption);
+    //마커와 정보창 초기화
+    var marker = new kakao.maps.Marker();
+    var infowindow = new kakao.maps.InfoWindow({removable: true});
+
+    var currentCircle = null;
+    //주어진 위도와 경도에 반경을 표시
+    function displayCircle(lat, lon) {
+        if (currentCircle !== null) {
+            currentCircle.setMap(null);
+        }
+        currentCircle = new kakao.maps.Circle({
+            center: new kakao.maps.LatLng(lat, lon),
+            radius: 1000,
+            strokeWeight: 5,
+            strokeColor: '#75B8FA',
+            strokeOpacity: 1,
+            strokeStyle: 'dashed',
+            fillColor: '#CFE7FF',
+            fillOpacity: 0.7
+        });
+        currentCircle.setMap(map);
+    }
+    //주어진 위치에 마커 표시, 정보창에 메시지 출력
+    function displayMarker(locPosition, message) {
+        marker.setMap(map);
+        marker.setPosition(locPosition);
+        infowindow.setContent(message);
+        infowindow.open(map, marker);
+        map.setCenter(locPosition);
+    }
+    // 페이지 로드 시 사용자의 현재 위치를 찾아 지도의 중심으로 설정
+    window.onload = function() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                var lat = position.coords.latitude,
+                    lon = position.coords.longitude;
+
+                var locPosition = new kakao.maps.LatLng(lat, lon),
+                    message = '<div class="infoWindow">현재 위치</div>';
+
+                displayMarker(locPosition, message);
+                displayCircle(lat, lon);
+
+            }, function(error) {
+                console.error(error);
+            }, {
+                enableHighAccuracy: true,
+                maximumAge: 0,
+                timeout: Infinity
+            });
+        } else {
+            alert('geolocation을 사용할 수 없어요..');
+        }
+    };
+    //검색 위치로 이동
+    document.getElementById('searchBtn').addEventListener('click', function() {
+        var geocoder = new kakao.maps.services.Geocoder();
+
+        var keyword = document.getElementById('address').value;
+        geocoder.addressSearch(keyword, function(result, status) {
+            if (status === kakao.maps.services.Status.OK) {
+                var coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+
+                marker.setPosition(coords);
+                marker.setMap(map);
+
+                var message = '<div class="infoWindow">검색 결과: ' + result[0].address_name + '</div>';
+                infowindow.setContent(message);
+                infowindow.open(map, marker);
+
+                map.setCenter(coords);
+                displayCircle(result[0].y, result[0].x);
+            } else {
+                alert("검색 결과가 없습니다. 주소를 다시 확인해주세요.");
+            }
+        });
+    });
+    //'내 위치로'버튼 클릭시 현재 내 위치로 이동.
+    document.getElementById('findMyLocation').addEventListener('click', function() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                var lat = position.coords.latitude,
+                    lon = position.coords.longitude;
+
+                var locPosition = new kakao.maps.LatLng(lat, lon),
+                    message = '<div class="infoWindow">현재 위치</div>';
+
+                displayMarker(locPosition, message);
+                displayCircle(lat, lon);
+            }, function(error) {
+                console.error(error);
+            }, {
+                enableHighAccuracy: true,
+                maximumAge: 0,
+                timeout: Infinity
+            });
+        } else {
+            alert('geolocation을 사용할 수 없어요..');
+        }
+    });
+</script>
+</body>
+</html>
