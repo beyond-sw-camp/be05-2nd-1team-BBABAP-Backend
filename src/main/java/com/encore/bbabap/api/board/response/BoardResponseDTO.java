@@ -16,5 +16,6 @@ public class BoardResponseDTO {
     private String nickname;
     private LocalDateTime registeredAt;
     private LocalDateTime updatedAt;
+    private Long commentCount;
     private List<CommentResponseDTO> comments;
 }

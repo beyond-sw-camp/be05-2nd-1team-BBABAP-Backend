@@ -183,6 +183,9 @@ public class BoardService {
     }
 
     private BoardResponseDTO convertToDTO(Board board) {
+        long commentCount = board.getComments().stream()
+                .filter(comment -> !comment.getDeletedYn())
+                .count();
         List<CommentResponseDTO> commentDTOs = board.getComments().stream()
                 .filter(comment -> !comment.getDeletedYn())
                 .map(comment -> CommentResponseDTO.builder()
@@ -202,6 +205,7 @@ public class BoardService {
                 .registeredAt(board.getRegisteredAt())
                 .updatedAt(board.getUpdatedAt())
                 .comments(commentDTOs)
+                .commentCount(commentCount)
                 .build();
     }
 }
