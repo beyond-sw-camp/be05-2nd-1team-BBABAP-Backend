@@ -19,6 +19,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/boards")
+@CrossOrigin(origins = "http://localhost:8080")
 @RequiredArgsConstructor
 @Tag(name = "게시판 - 게시글", description = "사용자가 게시글을 작성, 조회, 수정, 삭제하는 API")
 public class BoardController {

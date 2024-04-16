@@ -18,6 +18,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/members")
+@CrossOrigin(origins = "http://localhost:8080")
 @Tag(name = "회원 ", description = "사용자가 회원 가입, 회원 수정 API")
 public class UserApi {
 
