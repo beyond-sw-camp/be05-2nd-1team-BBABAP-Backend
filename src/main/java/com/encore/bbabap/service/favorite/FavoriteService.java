@@ -24,7 +24,7 @@ public class FavoriteService {
     static final String realDataURL = "https://api.odcloud.kr/api/15119741/v1/uddi:fe904caf-636f-4a49-aa94-e9064a446b3e"; //실제 API데이터를 가져오는 URL
     static final String myServiceKey = "By8%2BzbzlZwxRaJwkLoTWe7rgJIYf3TIkEnbrCY5mNB8f3clGoYgnY8J7f5C8bDSD1p21ek7oJoGHFbWhwRMRhw%3D%3D";//API키 >> 본인 키로 변경
     //추가
-    public String saveChargerInfoByName(String chargerName) {
+    public String saveFavorite(String chargerName) {
         StringBuffer result = new StringBuffer();
         try {
             String apiUrl = realDataURL + "?serviceKey=" + myServiceKey + "&page=1&perPage=100"; // 실제 API URL과 파라미터 수정 필요
@@ -70,14 +70,14 @@ public class FavoriteService {
         }
     }//saveChargerInfoByName end
     //조회
-    public List<FavoriteResponseDTO> findChargerInfoByName(/*나중에 여기에 사용자 아이디(이름)을 받아서 특정 회원의 즐겨찾기만 가져오도록 만들기*/) {
+    public List<FavoriteResponseDTO> findFavorite(/*나중에 여기에 사용자 아이디(이름)을 받아서 특정 회원의 즐겨찾기만 가져오도록 만들기*/) {
         List<FavoriteEntity> favoriteEntities = favoriteRepository.findAll();
         return favoriteEntities.stream()
                                .map(FavoriteResponseDTO::favoriteResponseDTO)
                                .collect(Collectors.toList());
     }//findChargerInfoByName end
     //삭제
-    public String deleteChargerInfoById(Long id) {
+    public String deleteFavorite(Long id) {
         favoriteRepository.deleteById(id);
         return "즐겨찾기 삭제 완료";
     }//deleteChargerInfoById end

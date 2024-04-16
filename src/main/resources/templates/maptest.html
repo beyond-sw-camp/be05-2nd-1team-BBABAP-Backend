@@ -12,10 +12,13 @@
             border: 1px solid #CCCCCC;
             border-radius: 5px;
             width: auto;
-            min-width: 150px;
-            max-width: 300px;
+            min-width: 150px; /* 최소너비 */
+            max-width: 400px; /* 최대 너비 */
+            word-wrap: break-word; /* 긴 텍스트 자동 줄바꿈 */
+            overflow: hidden; /* 내용이 넘치지 않도록 처리 */
         }
     </style>
+
 </head>
 
 <body>
@@ -63,35 +66,36 @@
         });
         currentCircle.setMap(map);
     }
-    //주어진 위치에 마커 표시, 정보창에 메시지 출력
+    // 주어진 위치에 마커 표시, 정보창에 메시지 출력
     function displayMarker(locPosition, message) {
         marker.setMap(map);
         marker.setPosition(locPosition);
+
+        // 마커 클릭 이벤트를 등록합니다
+        kakao.maps.event.addListener(marker, 'click', function() {
+            var geocoder = new kakao.maps.services.Geocoder();
+            // 마커의 좌표 정보를 사용하여 주소 정보를 요청합니다
+            geocoder.coord2Address(marker.getPosition().getLng(), marker.getPosition().getLat(), function(result, status) {
+                if (status === kakao.maps.services.Status.OK) {
+                    var detailAddr = !!result[0].road_address ?
+                        '<div style="padding: 5px; border-bottom: 1px solid #eee; margin-bottom: 5px;">도로명주소 : ' + result[0].road_address.address_name + '</div>' :
+                        '';
+                    detailAddr += '<div style="padding: 5px;">지번 주소 : ' + result[0].address.address_name + '</div>';
+                    // 인포윈도우에 상세 주소 정보를 표시합니다
+                    infowindow.setContent('<div style="margin:10px; font-size:12px; min-width:200px; line-height:1.5;">' + detailAddr + '</div>');
+                    infowindow.open(map, marker);
+                }
+            });
+        });
+
+
+        // 정보창에 메시지 설정
         infowindow.setContent(message);
         infowindow.open(map, marker);
+
+        // 지도 중심 위치 설정
         map.setCenter(locPosition);
     }
-    // 서버로부터 충전소 데이터를 가져오는 함수
-    function fetchChargers() {
-        fetch('/chargers')
-            .then(function(response) {
-                return response.json(); // 서버로부터 받은 JSON 응답을 JavaScript 객체로 파싱
-            })
-            .then(function(chargers) {
-                chargers.forEach(function(charger) {
-                    var markerPosition  = new kakao.maps.LatLng(charger.latitude, charger.longitude);
-                    var marker = new kakao.maps.Marker({
-                        position: markerPosition
-                    });
-                    marker.setMap(map); // 마커를 지도에 표시
-                });
-            })
-            .catch(function(error) {
-                console.error('Error:', error);
-            });
-    }
-
-    fetchChargers(); // 충전소 데이터를 가져와 지도에 마커를 표시하는 함수를 호출
     // 페이지 로드 시 사용자의 현재 위치를 찾아 지도의 중심으로 설정
     window.onload = function() {
         if (navigator.geolocation) {
@@ -160,6 +164,15 @@
             });
         } else {
             alert('geolocation을 사용할 수 없어요..');
+        }
+    });
+    // 검색창에서 키 이벤트 감지
+    var addressInput = document.getElementById('address');
+    addressInput.addEventListener('keydown', function(event) {
+        // 엔터 키가 눌렸을 때
+        if (event.key === "Enter") {
+            // 검색 버튼 클릭 이벤트 발생
+            document.getElementById('searchBtn').click();
         }
     });
 </script>
