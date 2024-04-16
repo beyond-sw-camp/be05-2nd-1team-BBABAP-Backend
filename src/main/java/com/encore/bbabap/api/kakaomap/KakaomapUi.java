@@ -11,7 +11,6 @@ public class KakaomapUi {
     @GetMapping(value = "/map")
     public String mymap(){
         System.out.println(">>> 카카오 맵 UI 출력 완료 <<<");
-//        return "map";
         return "maptest";
     }//method end
 
