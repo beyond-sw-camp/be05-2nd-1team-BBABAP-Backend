@@ -58,27 +58,24 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .securityContext((context) -> context.requireExplicitSave(false))
-                .sessionManagement((session ) -> session .sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
-                .cors(corsCustomizer -> corsCustomizer.configurationSource(new CorsConfigurationSource() {
-                    @Override
-                    public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
-                        CorsConfiguration config = new CorsConfiguration();
-                        config.setAllowedOrigins(Collections.singletonList("http://localhost:8080"));
-                        config.setAllowedMethods(Collections.singletonList("*"));
-                        config.setAllowCredentials(true);
-                        config.setAllowedHeaders(Collections.singletonList("*"));
-                        config.setMaxAge(3600L);
-                        return config;
-                    }
+                .sessionManagement(
+                        (session) -> session.sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
+                .cors(corsCustomizer -> corsCustomizer.configurationSource(request -> {
+                    CorsConfiguration config = new CorsConfiguration();
+                    config.setAllowedOrigins(Collections.singletonList("http://localhost:8080"));
+                    config.setAllowedMethods(Collections.singletonList("*"));
+                    config.setAllowCredentials(true);
+                    config.setAllowedHeaders(Collections.singletonList("*"));
+                    config.setMaxAge(3600L);
+                    return config;
                 }))
                 .csrf(CsrfConfigurer<HttpSecurity>::disable)
-                //.csrf(csrf -> csrf.ignoringRequestMatchers(PathRequest.toH2Console()))
-                .headers(headers -> headers.frameOptions(FrameOptionsConfig::sameOrigin))
-
-                .csrf(csrf -> csrf.ignoringRequestMatchers(PathRequest.toH2Console()))
-                .csrf(AbstractHttpConfigurer::disable)
-                .cors(AbstractHttpConfigurer::disable)
                 .headers(headers -> headers.frameOptions(FrameOptionsConfig::sameOrigin));
+
+//                .csrf(csrf -> csrf.ignoringRequestMatchers(PathRequest.toH2Console()))
+//                .csrf(AbstractHttpConfigurer::disable)
+//                .cors(AbstractHttpConfigurer::disable)
+//                .headers(headers -> headers.frameOptions(FrameOptionsConfig::sameOrigin));
 
         http
                 .formLogin(AbstractHttpConfigurer::disable);
