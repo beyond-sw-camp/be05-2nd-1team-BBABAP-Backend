@@ -20,6 +20,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/boards")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:8080")
 @Tag(name = "게시판 - 게시글", description = "사용자가 게시글을 작성, 조회, 수정, 삭제하는 API")
 public class BoardController {
 
@@ -82,4 +83,10 @@ public class BoardController {
         List<BoardResponseDTO> boards = boardService.getMyBoards();
         return ResponseEntity.ok(boards);
     }
+
+    @GetMapping("/test")
+    public String test(){
+        System.out.println("test");
+      return   "test";
+    };
 }
