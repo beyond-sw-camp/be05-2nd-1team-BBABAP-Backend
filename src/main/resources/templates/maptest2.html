@@ -147,14 +147,6 @@
                             message = '<div class="infoWindow">' + $(this).text() + '</div>';
                         displayMarker(locPosition, message);
                         displayCircle(lat, lon);
-                        // 지번 주소를 출력
-                        var geocoder = new kakao.maps.services.Geocoder();
-                        geocoder.coord2Address(lon, lat, function(result, status) {
-                            if (status === kakao.maps.services.Status.OK) {
-                                var address = result[0].address.address_name;
-                                alert("선택한 위치의 지번 주소: " + address); // alert으로 출력
-                            }
-                        });
                     });
                 } else if (result.length === 1) { // 검색 결과가 하나인 경우
                     var coords = new kakao.maps.LatLng(result[0].y, result[0].x);
@@ -165,14 +157,6 @@
                     infowindow.open(map, marker);
                     map.setCenter(coords);
                     displayCircle(result[0].y, result[0].x);
-                    // 지번 주소를 출력
-                    var geocoder = new kakao.maps.services.Geocoder();
-                    geocoder.coord2Address(result[0].x, result[0].y, function(result, status) {
-                        if (status === kakao.maps.services.Status.OK) {
-                            var address = result[0].address.address_name;
-                            alert("선택한 위치의 지번 주소: " + address); // alert으로 출력
-                        }
-                    });
                 } else {
                     alert("검색 결과가 없습니다. 주소를 다시 확인해주세요.");
                 }
