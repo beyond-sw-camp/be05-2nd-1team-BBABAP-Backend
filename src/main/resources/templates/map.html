@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>내 위치로 이동 및 반경 표시</title>
+
     <!-- kakao API -->
 <!--    <script src="/resources/kakaomapAPIKey.js"></script>-->
     <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=20d8bd05963c7e7755d93c037fbdb9fe&libraries=services,geometry"></script>
@@ -35,6 +36,8 @@
 </table>
 <!--카카오 맵을 표시할 영역-->
 <div id="map" style="width:85%;height:700px;"></div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script>
     var mapContainer = document.getElementById('map');
     //지도 초기 정보 설정.
@@ -104,6 +107,7 @@
     }
     // 페이지 로드 시 사용자의 현재 위치를 찾아 지도의 중심으로 설정
     window.onload = function() {
+
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(function(position) {
                 var lat = position.coords.latitude,
@@ -128,26 +132,37 @@
     };
     //검색 위치로 이동
     document.getElementById('searchBtn').addEventListener('click', function() {
-        var geocoder = new kakao.maps.services.Geocoder();
-
-        var keyword = document.getElementById('address').value;
-        geocoder.addressSearch(keyword, function(result, status) {
-            if (status === kakao.maps.services.Status.OK) {
-                var coords = new kakao.maps.LatLng(result[0].y, result[0].x);
-
-                marker.setPosition(coords);
-                marker.setMap(map);
-
-                var message = '<div class="infoWindow">검색 결과: ' + result[0].address_name + '</div>';
-                infowindow.setContent(message);
-                infowindow.open(map, marker);
-
-                map.setCenter(coords);
-                displayCircle(result[0].y, result[0].x);
-            } else {
-                alert("검색 결과가 없습니다. 주소를 다시 확인해주세요.");
+        alert("click");
+        let addr = $('#address').val();
+        alert("addr >>>>>>>>> "+ addr);
+        $.ajax({
+            url : `http://localhost:7777/bbabap/getchargeraddress/${addr}` ,
+            dataType : 'json' ,
+            success : function(lst) {
+                alert('success');
             }
         });
+        // var geocoder = new kakao.maps.services.Geocoder();
+        //
+        // var keyword = document.getElementById('address').value;
+        // geocoder.addressSearch(keyword, function(result, status) {
+        //     if (status === kakao.maps.services.Status.OK) {
+        //         var coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+        //
+        //         marker.setPosition(coords);
+        //         marker.setMap(map);
+        //
+        //         var message = '<div class="infoWindow">검색 결과: ' + result[0].address_name + '</div>';
+        //         infowindow.setContent(message);
+        //         infowindow.open(map, marker);
+        //
+        //         map.setCenter(coords);
+        //         displayCircle(result[0].y, result[0].x);
+        //     } else {
+        //         alert("검색 결과가 없습니다. 주소를 다시 확인해주세요.");
+        //     }
+        // });
+
     });
     //'내 위치로'버튼 클릭시 현재 내 위치로 이동.
     document.getElementById('findMyLocation').addEventListener('click', function() {
@@ -181,6 +196,11 @@
             document.getElementById('searchBtn').click();
         }
     });
+
+    /////////////////////////////
+    $(document).ready(function() {
+
+    })
 </script>
 </body>
 
