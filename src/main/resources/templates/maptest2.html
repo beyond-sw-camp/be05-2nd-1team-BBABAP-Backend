@@ -49,8 +49,8 @@
     //마커와 정보창 객체 생성
     var marker = new kakao.maps.Marker();
     var infowindow = new kakao.maps.InfoWindow({removable: true});
-
     var currentCircle = null;
+    var markersArray = []; // 마커를 관리할 배열 추가
     //주어진 위도와 경도에 반경(원)을 표시
     function displayCircle(lat, lon) {
         if (currentCircle !== null) {//기존에 표시된 반경이 있다면 제거
@@ -70,8 +70,10 @@
     }//displayCircle end
     // 주어진 위치에 마커 표시, 정보창에 메시지 출력
     function displayMarker(locPosition, message) {
+        clearMarkers(); // 기존 마커 제거
         marker.setMap(map);//마커를 지정된 위치에 배치
         marker.setPosition(locPosition);//locPosition 매개변수로 전달된 위치에 새로운 마커를 생성하고 지도에 표시
+        markersArray.push(marker); // 마커를 배열에 추가
         // 마커 클릭 이벤트를 등록. 마커를 클릭하면 해당 위치의 주소 정보를 가져와서 정보창에 출력
         kakao.maps.event.addListener(marker, 'click', function() {
             var geocoder = new kakao.maps.services.Geocoder();
@@ -99,6 +101,15 @@
         // 지도 중심 위치 설정
         map.setCenter(locPosition);
     }//displayMarker end
+
+    // 기존에 표시한 모든 마커를 제거하는 함수
+    function clearMarkers() {
+        for (var i = 0; i < markersArray.length; i++) {
+            markersArray[i].setMap(null);
+        }
+        markersArray = [];
+    }
+
     // 페이지 로드 시 사용자의 현재 위치를 찾아 지도의 중심으로 설정
     window.onload = function() {
         if (navigator.geolocation) {
@@ -124,10 +135,8 @@
     document.getElementById('searchBtn').addEventListener('click', function() {
         var addr = $('#address').val();
         alert("검색한 주소 : "+ addr);
-
         // kakao maps Places 객체 생성
         var places = new kakao.maps.services.Places();
-
         // 주소 검색 요청
         places.keywordSearch(addr, function(result, status) {
             if (status === kakao.maps.services.Status.OK) {
@@ -141,7 +150,6 @@
                     // 팝업 창에 리스트 표시
                     $('#searchResults').html(popupList);
                     $('#searchResults').show();
-
                     // 리스트 아이템을 클릭하면 해당 위치로 이동
                     $('.searchResult').click(function(event) {
                         event.preventDefault();
@@ -149,7 +157,37 @@
                         var lon = $(this).data('lon');
                         var locPosition = new kakao.maps.LatLng(lat, lon),
                             message = '<div class="infoWindow">' + $(this).text() + '</div>';
-                        displayMarker(locPosition, message);
+                        // 마커 생성
+                        var selectedMarker = new kakao.maps.Marker({
+                            position: locPosition
+                        });
+                        // 배열에 마커 추가
+                        markersArray.push(selectedMarker);
+                        // 마커를 지도에 표시
+                        selectedMarker.setMap(map);
+                        // 마커를 클릭했을 때 정보창 표시
+                        kakao.maps.event.addListener(selectedMarker, 'click', function() {
+                            var geocoder = new kakao.maps.services.Geocoder();
+                            // 마커의 좌표 정보를 사용하여 주소 정보를 요청.
+                            geocoder.coord2Address(selectedMarker.getPosition().getLng(), selectedMarker.getPosition().getLat(), function(result, status) {
+                                if (status === kakao.maps.services.Status.OK) {
+                                    var detailAddr = !!result[0].road_address ?
+                                        '<div style="padding: 5px; border-bottom: 1px solid #eee; margin-bottom: 5px;">도로명주소 : '
+                                        + result[0].road_address.address_name + '</div>':
+                                        '';
+                                    detailAddr += '<div style="padding: 5px;">지번 주소 : ' + result[0].address.address_name + '</div>' + '<button id="addFavorite" style="margin-top: 5px;">즐겨찾기 추가</button>';
+                                    // 인포윈도우에 상세 주소 정보를 표시합니다
+                                    infowindow.setContent('<div style="margin:10px; font-size:12px; min-width:200px; line-height:1.5;">' + $(this).text() + '</div>' + '<div style="margin:10px; font-size:12px; min-width:200px; line-height:1.5;">' + detailAddr + '</div>');
+                                    infowindow.open(map, selectedMarker);
+                                    // 즐겨찾기 버튼 클릭 이벤트 리스너
+                                    document.getElementById('addFavorite').addEventListener('click', function() {
+                                        alert("즐겨찾기 버튼 클릭");
+                                    });
+                                }
+                            });
+                        });
+                        // 선택한 위치로 이동
+                        map.setCenter(locPosition);
                         displayCircle(lat, lon);
                         // 지번 주소를 출력
                         var geocoder = new kakao.maps.services.Geocoder();
@@ -157,17 +195,16 @@
                             if (status === kakao.maps.services.Status.OK) {
                                 var address = result[0].address.address_name;
                                 alert("선택한 위치의 지번 주소: " + address); // alert으로 출력
-
-                                // AJAX 통신으로 지번 주소 데이터 가져오기
+                                // 주소를 시/도 까지만 잘라내기
+                                var slicedAddr = address.split(' ').slice(0, 1).join(' ');
+                                // AJAX 통신으로 잘라낸 지번 주소 데이터 전달
                                 $.ajax({
-                                    url : `http://localhost:7777/bbabap/getchargeraddress/${address}` ,
+                                    url : `http://localhost:7777/bbabap/getchargeraddress/${slicedAddr}` ,
                                     dataType : 'json' ,
                                     success : function(data) {
                                         console.log('Charger Info:', data);
                                         // 반환된 데이터 중 'data'키에 해당하는 배열에 접근하여 마커 표시 함수 호출
                                         displayMarkersWithAddresses(data.data);
-                                        // 검색한 주소로 이동
-                                        moveMapToAddress(address);
                                     }
                                 });
                             }
@@ -188,17 +225,16 @@
                         if (status === kakao.maps.services.Status.OK) {
                             var address = result[0].address.address_name;
                             alert("선택한 위치의 지번 주소: " + address); // alert으로 출력
-
-                            // AJAX 통신으로 지번 주소 데이터 가져오기
+                            // 주소를 시/도 까지만 잘라내기
+                            var slicedAddr = address.split(' ').slice(0, 2).join(' ');
+                            // AJAX 통신으로 잘라낸 지번 주소 데이터 전달
                             $.ajax({
-                                url : `http://localhost:7777/bbabap/getchargeraddress/${address}` ,
+                                url : `http://localhost:7777/bbabap/getchargeraddress/${slicedAddr}` ,
                                 dataType : 'json' ,
                                 success : function(data) {
                                     console.log('Charger Info:', data);
                                     // 반환된 데이터 중 'data'키에 해당하는 배열에 접근하여 마커 표시 함수 호출
                                     displayMarkersWithAddresses(data.data);
-                                    // 검색한 주소로 이동
-                                    moveMapToAddress(address);
                                 }
                             });
                         }
@@ -213,6 +249,7 @@
     });
     // 주소와 충전소명이 있는 데이터 배열을 받아서 지도에 마커를 표시하는 함수
     function displayMarkersWithAddresses(dataArray) {
+        clearMarkers(); // 기존 마커 제거
         // 배열에 있는 각 데이터에 대해 반복하며 마커를 표시
         dataArray.forEach(function(charger) {
             // 주소를 이용하여 지도에 마커를 생성하고 표시
@@ -226,7 +263,8 @@
                     });
                     // 마커를 지도에 표시
                     marker.setMap(map);
-                    // 마커 클릭 시 정보창에 주소 정보와 즐겨찾기 버튼을 함께 출력
+                    markersArray.push(marker); // 마커를 배열에 추가
+                    // 마커 클릭 시 정보창 표시
                     kakao.maps.event.addListener(marker, 'click', function() {
                         var geocoder = new kakao.maps.services.Geocoder();
                         // 마커의 좌표 정보를 사용하여 주소 정보를 요청.
@@ -247,27 +285,37 @@
                             }//if end
                         });
                     });//click event end
-                    // 마커를 클릭했을 때 정보창을 열기 위한 내용 설정
-                    var message = '<div class="infoWindow">' + charger.충전소명 + '</div>';
-                    infowindow.setContent(message);
-                    infowindow.open(map, marker);//지도에 정보창 표시
-                }
+                }//if end
             });
         });
-    }//displayMarkersWithAddresses end
-    //'내 위치로'버튼 클릭시 현재 내 위치로 이동.
-    document.getElementById('findMyLocation').addEventListener('click', function () {
+    }
+
+    // 검색 결과가 하나인 경우에 해당하는 주소로 이동하는 함수
+    function moveMapToAddress(address) {
+        // 주소 검색을 통해 좌표를 받아옴
+        var geocoder = new kakao.maps.services.Geocoder();
+        geocoder.addressSearch(address, function(result, status) {
+            if (status === kakao.maps.services.Status.OK) {
+                var coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+                // 지도 중심을 해당 좌표로 이동
+                map.setCenter(coords);
+                // 지도 레벨을 조정하여 좌표가 화면에 잘 보이도록 함
+                map.setLevel(4);
+            }
+        });
+    }
+
+    // 내 위치로 이동하는 버튼 클릭 시 이벤트
+    document.getElementById('findMyLocation').addEventListener('click', function() {
         if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(function (position) {
+            navigator.geolocation.getCurrentPosition(function(position) {
                 var lat = position.coords.latitude,
                     lon = position.coords.longitude;
-
                 var locPosition = new kakao.maps.LatLng(lat, lon),
-                    message = '<div class="infoWindow">현재 위치</div>';
-
+                    message = '<div class="infoWindow">현재 나의 위치</div>';
                 displayMarker(locPosition, message);
                 displayCircle(lat, lon);
-            }, function (error) {
+            }, function(error) {
                 console.error(error);
             }, {
                 enableHighAccuracy: true,
@@ -275,7 +323,7 @@
                 timeout: Infinity
             });
         } else {
-            alert('geolocation을 사용할 수 없어요..');
+            alert('geolocation을 사용할 수 없습니다.');
         }
     });
     // 검색창에서 키 이벤트 감지

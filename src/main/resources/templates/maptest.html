@@ -49,7 +49,6 @@
     //마커와 정보창 객체 생성
     var marker = new kakao.maps.Marker();
     var infowindow = new kakao.maps.InfoWindow({removable: true});
-
     var currentCircle = null;
     //주어진 위도와 경도에 반경(원)을 표시
     function displayCircle(lat, lon) {
@@ -70,6 +69,7 @@
     }//displayCircle end
     // 주어진 위치에 마커 표시, 정보창에 메시지 출력
     function displayMarker(locPosition, message) {
+        //clearMarkers(); // 기존 마커 제거
         marker.setMap(map);//마커를 지정된 위치에 배치
         marker.setPosition(locPosition);//locPosition 매개변수로 전달된 위치에 새로운 마커를 생성하고 지도에 표시
         // 마커 클릭 이벤트를 등록. 마커를 클릭하면 해당 위치의 주소 정보를 가져와서 정보창에 출력
@@ -99,6 +99,15 @@
         // 지도 중심 위치 설정
         map.setCenter(locPosition);
     }//displayMarker end
+
+    // 기존에 표시한 모든 마커를 제거하는 함수
+    function clearMarkers() {
+        for (var i = 0; i < markersArray.length; i++) {
+            markersArray[i].setMap(null);
+        }
+        markersArray = [];
+    }
+
     // 페이지 로드 시 사용자의 현재 위치를 찾아 지도의 중심으로 설정
     window.onload = function() {
         if (navigator.geolocation) {
@@ -124,10 +133,8 @@
     document.getElementById('searchBtn').addEventListener('click', function() {
         var addr = $('#address').val();
         alert("검색한 주소 : "+ addr);
-
         // kakao maps Places 객체 생성
         var places = new kakao.maps.services.Places();
-
         // 주소 검색 요청
         places.keywordSearch(addr, function(result, status) {
             if (status === kakao.maps.services.Status.OK) {
@@ -141,7 +148,6 @@
                     // 팝업 창에 리스트 표시
                     $('#searchResults').html(popupList);
                     $('#searchResults').show();
-
                     // 리스트 아이템을 클릭하면 해당 위치로 이동
                     $('.searchResult').click(function(event) {
                         event.preventDefault();
@@ -151,17 +157,14 @@
                             message = '<div class="infoWindow">' + $(this).text() + '</div>';
                         displayMarker(locPosition, message);
                         displayCircle(lat, lon);
-
                         // 지번 주소를 출력
                         var geocoder = new kakao.maps.services.Geocoder();
                         geocoder.coord2Address(lon, lat, function(result, status) {
                             if (status === kakao.maps.services.Status.OK) {
                                 var address = result[0].address.address_name;
                                 alert("선택한 위치의 지번 주소: " + address); // alert으로 출력
-
                                 // 주소를 시/도 까지만 잘라내기
                                 var slicedAddr = address.split(' ').slice(0, 1).join(' ');
-
                                 // AJAX 통신으로 잘라낸 지번 주소 데이터 전달
                                 $.ajax({
                                     url : `http://localhost:7777/bbabap/getchargeraddress/${slicedAddr}` ,
@@ -186,17 +189,14 @@
                     infowindow.open(map, marker);
                     map.setCenter(coords);
                     displayCircle(result[0].y, result[0].x);
-
                     // 지번 주소를 출력
                     var geocoder = new kakao.maps.services.Geocoder();
                     geocoder.coord2Address(result[0].x, result[0].y, function(result, status) {
                         if (status === kakao.maps.services.Status.OK) {
                             var address = result[0].address.address_name;
                             alert("선택한 위치의 지번 주소: " + address); // alert으로 출력
-
                             // 주소를 시/도 까지만 잘라내기
                             var slicedAddr = address.split(' ').slice(0, 2).join(' ');
-
                             // AJAX 통신으로 잘라낸 지번 주소 데이터 전달
                             $.ajax({
                                 url : `http://localhost:7777/bbabap/getchargeraddress/${slicedAddr}` ,
@@ -219,10 +219,9 @@
             }//if-else end
         });
     });
-
-
     // 주소와 충전소명이 있는 데이터 배열을 받아서 지도에 마커를 표시하는 함수
     function displayMarkersWithAddresses(dataArray) {
+        clearMarkers(); // 기존 마커 제거
         // 배열에 있는 각 데이터에 대해 반복하며 마커를 표시
         dataArray.forEach(function(charger) {
             // 주소를 이용하여 지도에 마커를 생성하고 표시
@@ -271,10 +270,8 @@
             navigator.geolocation.getCurrentPosition(function (position) {
                 var lat = position.coords.latitude,
                     lon = position.coords.longitude;
-
                 var locPosition = new kakao.maps.LatLng(lat, lon),
                     message = '<div class="infoWindow">현재 위치</div>';
-
                 displayMarker(locPosition, message);
                 displayCircle(lat, lon);
             }, function (error) {
