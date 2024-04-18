@@ -17,7 +17,7 @@ spring:
   main:
     allow-circular-references: true
 server:
-  port: 7777
+  port: 7770
 jwt:
   secret: "vmfhaltmskdlstkfkdgodyroqkfwkdbalroqkfwkdbalababababababababaa"
 #logging:

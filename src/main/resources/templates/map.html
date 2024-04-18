@@ -157,7 +157,7 @@
                                 var slicedAddr = address.split(' ').slice(0, 1).join(' ');
                                 // AJAX 통신으로 잘라낸 지번 주소 데이터 전달
                                 $.ajax({
-                                    url : `http://localhost:7777/bbabap/getchargeraddress/${slicedAddr}` ,
+                                    url : `http://localhost:7770/bbabap/getchargeraddress/${slicedAddr}` ,
                                     dataType : 'json' ,
                                     success : function(data) {
                                         console.log('Charger Info:', data);
@@ -189,7 +189,7 @@
                             var slicedAddr = address.split(' ').slice(0, 2).join(' ');
                             // AJAX 통신으로 잘라낸 지번 주소 데이터 전달
                             $.ajax({
-                                url : `http://localhost:7777/bbabap/getchargeraddress/${slicedAddr}` ,
+                                url : `http://localhost:7770/bbabap/getchargeraddress/${slicedAddr}` ,
                                 dataType : 'json' ,
                                 success : function(data) {
                                     console.log('Charger Info:', data);
@@ -240,7 +240,7 @@
                                 infowindow.open(map, marker);
                                 // 즐겨찾기 버튼 클릭 이벤트 리스너
                                 document.getElementById('addFavorite').addEventListener('click', function() {
-                                    alert("즐겨찾기 버튼 클릭");
+                                    alert("즐겨찾기에 추가");
                                 });
                             }//if end
                         });
